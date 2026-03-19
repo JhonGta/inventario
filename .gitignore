@@ -1,0 +1,7 @@
+registro_admin.php
+# Ignorar archivos temporales
+*.log
+*.tmp
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db
