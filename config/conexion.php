@@ -2,10 +2,10 @@
 // config/conexion.php
 // Conexión PDO preparada para XAMPP y Railway
 
-$DB_HOST = getenv('DB_HOST') ?: 'localhost';
-$DB_NAME = getenv('DB_NAME') ?: 'inventario';
-$DB_USER = getenv('DB_USER') ?: 'root';
-$DB_PASS = getenv('DB_PASS') ?: '';
+$DB_HOST = getenv('MYSQLHOST') ?: 'localhost';
+$DB_NAME = getenv('MYSQLDATABASE') ?: 'inventario';
+$DB_USER = getenv('MYSQLUSER') ?: 'root';
+$DB_PASS = getenv('MYSQLPASSWORD') ?: '';
 $DB_CHARSET = 'utf8mb4';
 
 $dsn = "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=$DB_CHARSET";
