@@ -1,12 +1,15 @@
-FROM php:8.1-cli
+FROM php:8.1-apache
 
 # Instalar extensiones necesarias
 RUN docker-php-ext-install pdo pdo_mysql
 
-WORKDIR /app
+# Habilitar mod_rewrite para .htaccess
+RUN a2enmod rewrite
+
+WORKDIR /var/www/html
 
 COPY . .
 
-EXPOSE 8080
+EXPOSE 80
 
-CMD ["php", "-S", "0.0.0.0:8080"]
+CMD ["apache2-foreground"]
