@@ -1,4 +1,3 @@
-
 <?php
 $DB_HOST = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: 'localhost';
 $DB_NAME = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'inventario';
