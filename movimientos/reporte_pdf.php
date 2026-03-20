@@ -4,13 +4,18 @@ require_once __DIR__ . '/../config/conexion.php';
 
 class CustomPDF extends TCPDF {
     public function Header() {
-        // Logo
-        $image_file = 'https://consorciobiocity.com/wp-content/uploads/2023/01/logo-biocity.png';
-        $this->Image($image_file, 12, 8, 38, '', 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+        $canRenderAlphaPng = extension_loaded('gd') || extension_loaded('imagick');
+
+        // Logo (solo si el entorno soporta PNG con alpha)
+        if ($canRenderAlphaPng) {
+            $image_file = 'https://consorciobiocity.com/wp-content/uploads/2023/01/logo-biocity.png';
+            $this->Image($image_file, 12, 8, 38, '', 'PNG', '', 'T', false, 300, '', false, false, 0, false, false, false);
+        }
+
         // Título
         $this->SetFont('helvetica', 'B', 18);
-        $this->SetXY(55, 12);
-        $this->Cell(100, 12, 'REPORTE DE INVENTARIO', 0, 0, 'C', false, '', 1, false, 'M', 'M');
+        $this->SetXY($canRenderAlphaPng ? 55 : 12, 12);
+        $this->Cell($canRenderAlphaPng ? 100 : 186, 12, 'REPORTE DE INVENTARIO', 0, 0, 'C', false, '', 1, false, 'M', 'M');
         // Ya no se muestra la fecha
         $this->Ln(15);
     }
