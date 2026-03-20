@@ -1,6 +1,5 @@
 
 <?php
-// Configuración flexible para Railway y local
 $DB_HOST = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: 'localhost';
 $DB_NAME = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'inventario';
 $DB_USER = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
