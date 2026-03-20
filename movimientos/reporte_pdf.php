@@ -1,6 +1,6 @@
 <?php
-require_once '../tcpdf-main/tcpdf.php';
-require_once '../config/conexion.php';
+require_once __DIR__ . '/../TCPDF-main/tcpdf.php';
+require_once __DIR__ . '/../config/conexion.php';
 
 class CustomPDF extends TCPDF {
     public function Header() {
