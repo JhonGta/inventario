@@ -1,17 +1,14 @@
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-<?php
-// config/conexion.php
-// Conexión PDO preparada para XAMPP y Railway
 
-$DB_HOST = getenv('MYSQLHOST') ?: 'localhost';
-$DB_NAME = getenv('MYSQLDATABASE') ?: 'inventario';
-$DB_USER = getenv('MYSQLUSER') ?: 'root';
-$DB_PASS = getenv('MYSQLPASSWORD') ?: '';
+<?php
+// Configuración flexible para Railway y local
+$DB_HOST = getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: 'localhost';
+$DB_NAME = getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'inventario';
+$DB_USER = getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root';
+$DB_PASS = getenv('MYSQLPASSWORD') ?: getenv('DB_PASSWORD') ?: '';
+$DB_PORT = getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: 3306;
 $DB_CHARSET = 'utf8mb4';
 
-$dsn = "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=$DB_CHARSET";
+$dsn = "mysql:host=$DB_HOST;port=$DB_PORT;dbname=$DB_NAME;charset=$DB_CHARSET";
 $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -21,6 +18,5 @@ $options = [
 try {
     $pdo = new PDO($dsn, $DB_USER, $DB_PASS, $options);
 } catch (PDOException $e) {
-    // No mostrar detalles sensibles en producción
-    exit('Error de conexión a la base de datos.');
+    exit('Error de conexión a la base de datos: ' . $e->getMessage());
 }
