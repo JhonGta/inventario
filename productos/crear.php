@@ -2,6 +2,7 @@
 session_start();
 if (!isset($_SESSION['id_admin'])) { header('Location: ../login.php'); exit; }
 require_once '../config/conexion.php';
+
 // Obtener solo categorías activas
 $cats = $pdo->query("SELECT * FROM categorias WHERE estado = 'ACTIVO' ORDER BY nombre")->fetchAll();
 $nombre = $descripcion = $id_categoria = '';
@@ -16,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$nombre, $descripcion, $id_categoria]);
             header('Location: listar.php'); exit;
         } catch (PDOException $e) {
+            
             $error = 'Error al crear producto.';
         }
     } else {
