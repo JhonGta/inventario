@@ -1,37 +1,58 @@
 <?php
-$databaseUrl = getenv('DATABASE_URL') ?: getenv('MYSQL_URL') ?: getenv('MYSQL_PUBLIC_URL');
+$candidatos = [
+    [
+        'fuente' => 'vars_internas',
+        'host' => getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: 'localhost',
+        'port' => getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: getenv('DB_PORT') ?: 3306,
+        'dbname' => getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: 'inventario',
+        'user' => getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: getenv('DB_USER') ?: 'root',
+        'pass' => getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: getenv('DB_PASSWORD') ?: '',
+        'ssl' => false,
+    ],
+];
 
-if ($databaseUrl) {
-    $parts = parse_url($databaseUrl);
-
-    if ($parts !== false) {
-        $DB_HOST = $parts['host'] ?? 'localhost';
-        $DB_PORT = $parts['port'] ?? 3306;
-        $DB_NAME = isset($parts['path']) ? ltrim($parts['path'], '/') : 'inventario';
-        $DB_USER = $parts['user'] ?? 'root';
-        $DB_PASS = $parts['pass'] ?? '';
+foreach (['MYSQL_URL', 'DATABASE_URL', 'MYSQL_PUBLIC_URL'] as $nombreVariable) {
+    $valor = getenv($nombreVariable);
+    if ($valor) {
+        $parts = parse_url($valor);
+        if ($parts !== false) {
+            $candidatos[] = [
+                'fuente' => $nombreVariable,
+                'host' => $parts['host'] ?? 'localhost',
+                'port' => $parts['port'] ?? 3306,
+                'dbname' => isset($parts['path']) ? ltrim($parts['path'], '/') : 'inventario',
+                'user' => $parts['user'] ?? 'root',
+                'pass' => $parts['pass'] ?? '',
+                'ssl' => $nombreVariable === 'MYSQL_PUBLIC_URL',
+            ];
+        }
     }
 }
 
-if (!isset($DB_HOST, $DB_PORT, $DB_NAME, $DB_USER, $DB_PASS)) {
-    $DB_HOST = getenv('MYSQLHOST') ?: getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: 'localhost';
-    $DB_NAME = getenv('MYSQLDATABASE') ?: getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: 'inventario';
-    $DB_USER = getenv('MYSQLUSER') ?: getenv('MYSQL_USER') ?: getenv('DB_USER') ?: 'root';
-    $DB_PASS = getenv('MYSQLPASSWORD') ?: getenv('MYSQL_PASSWORD') ?: getenv('DB_PASSWORD') ?: '';
-    $DB_PORT = getenv('MYSQLPORT') ?: getenv('MYSQL_PORT') ?: getenv('DB_PORT') ?: 3306;
+$pdo = null;
+$ultimoError = null;
+
+foreach ($candidatos as $candidato) {
+    $dsn = "mysql:host={$candidato['host']};port={$candidato['port']};dbname={$candidato['dbname']};charset=utf8mb4";
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::ATTR_TIMEOUT => 5,
+    ];
+
+    if ($candidato['ssl'] && defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+        $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+    }
+
+    try {
+        $pdo = new PDO($dsn, $candidato['user'], $candidato['pass'], $options);
+        break;
+    } catch (PDOException $e) {
+        $ultimoError = $e;
+    }
 }
 
-$DB_CHARSET = 'utf8mb4';
-$dsn = "mysql:host=$DB_HOST;port=$DB_PORT;dbname=$DB_NAME;charset=$DB_CHARSET";
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES => false,
-    PDO::ATTR_TIMEOUT => 5,
-];
-
-try {
-    $pdo = new PDO($dsn, $DB_USER, $DB_PASS, $options);
-} catch (PDOException $e) {
-    die('Error de conexion: ' . $e->getMessage());
+if (!$pdo) {
+    die('Error de conexion: ' . ($ultimoError ? $ultimoError->getMessage() : 'No fue posible conectar a la base de datos.'));
 }
